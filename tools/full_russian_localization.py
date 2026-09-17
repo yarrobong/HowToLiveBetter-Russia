@@ -114,8 +114,8 @@ def rename_books() -> dict[str, str]:
 
 def rename_main_docs() -> dict[str, str]:
     pairs = {
-        DOCS / "RUSSIA-MIGRATION.md": DOCS / "СТАТУС-АДАПТАЦИИ.md",
-        DOCS / "RUSSIA-SOURCES.md": DOCS / "ИСТОЧНИКИ-РФ.md",
+        DOCS / "СТАТУС-АДАПТАЦИИ.md": DOCS / "СТАТУС-АДАПТАЦИИ.md",
+        DOCS / "ИСТОЧНИКИ-РФ.md": DOCS / "ИСТОЧНИКИ-РФ.md",
     }
     replacements: dict[str, str] = {}
     for old, new in pairs.items():
@@ -129,7 +129,7 @@ def rename_main_docs() -> dict[str, str]:
 def replace_references(replacements: dict[str, str]) -> None:
     replacements = dict(replacements)
     replacements[
-        "docs/superpowers/specs/2026-09-17-russia-adaptation-design.md"
+        "docs/superpowers/specs/2026-09-17-полная-русификация.md"
     ] = "docs/superpowers/specs/2026-09-17-полная-русификация.md"
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".git" in path.parts or path.suffix.lower() not in TEXT_EXTENSIONS:
