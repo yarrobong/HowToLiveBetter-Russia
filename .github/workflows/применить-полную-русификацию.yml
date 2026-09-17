@@ -6,6 +6,8 @@ on:
       - full-russian-localization
     paths:
       - 'tools/full_russian_localization.py'
+      - 'docs/superpowers/plans/2026-09-17-полная-русификация.md'
+      - 'docs/superpowers/specs/2026-09-17-полная-русификация.md'
       - '.github/workflows/применить-полную-русификацию.yml'
 
 permissions:
