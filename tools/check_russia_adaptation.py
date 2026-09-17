@@ -66,6 +66,15 @@ def validate_cost_tag(text: str) -> list[str]:
     ]
 
 
+def card_requires_freshness(card: str) -> bool:
+    """Return True when a card relies on Russia-specific sources or rules."""
+    for raw_url in URL_RE.findall(card):
+        host = (urlparse(raw_url).hostname or "").lower()
+        if host == "ru" or host.endswith(".ru"):
+            return True
+    return False
+
+
 def validate_russian_card(card: str, *, require_freshness: bool) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_cost_tag(card))
@@ -130,7 +139,10 @@ def check_repository(root: Path) -> list[str]:
         if not cards:
             errors.append(f"{path}: не найдено карточек `### ...`")
         for index, card in enumerate(cards, start=1):
-            for error in validate_russian_card(card, require_freshness=True):
+            for error in validate_russian_card(
+                card,
+                require_freshness=card_requires_freshness(card),
+            ):
                 errors.append(f"{path}: карточка {index}: {error}")
 
     return errors
