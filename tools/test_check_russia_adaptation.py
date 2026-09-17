@@ -13,6 +13,9 @@ from tools.check_russia_adaptation import (
 )
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
 class RussiaAdaptationChecksTest(unittest.TestCase):
     def test_lists_exactly_31_numbered_sections(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -93,6 +96,15 @@ class RussiaAdaptationChecksTest(unittest.TestCase):
             statuses = parse_migration_manifest(root)
             self.assertEqual(statuses[1], "in-progress")
             self.assertEqual(statuses[5], "complete")
+
+    def test_static_ui_is_russian_and_migration_aware(self):
+        html = (PROJECT_ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<html lang="ru">', html)
+        self.assertIn("HowToLiveBetter-Russia", html)
+        self.assertIn("RUSSIA-MIGRATION.md", html)
+        self.assertIn("Адаптировано для России", html)
+        self.assertIn("Поиск по проверенным рекомендациям", html)
+        self.assertNotIn("高性价比人生指南", html)
 
 
 if __name__ == "__main__":
