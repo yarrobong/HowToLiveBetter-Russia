@@ -114,7 +114,7 @@ class RussiaAdaptationChecksTest(unittest.TestCase):
         self.assertIn("RUSSIA-MIGRATION.md", html)
         self.assertIn("Адаптировано для России", html)
         self.assertIn("Поиск по проверенным рекомендациям", html)
-        self.assertIn("31 / 31 разделов адаптировано", html)
+        self.assertIn("<b>31 / 31</b> разделов адаптировано", html)
         self.assertNotIn("Остальные разделы пока сохраняют исходную китайскую редакцию", html)
         self.assertNotIn("高性价比人生指南", html)
 
