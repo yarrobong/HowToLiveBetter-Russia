@@ -4,6 +4,7 @@ from pathlib import Path
 
 from tools.check_russia_adaptation import (
     REQUIRED_RUSSIAN_FIELDS,
+    card_requires_freshness,
     find_forbidden_china_refs,
     list_section_files,
     parse_migration_manifest,
@@ -40,16 +41,32 @@ class RussiaAdaptationChecksTest(unittest.TestCase):
 """
         self.assertEqual(validate_russian_card(card, require_freshness=True), [])
 
-    def test_reports_missing_freshness_for_russia_specific_card(self):
+    def test_russian_source_requires_freshness(self):
         card = """### 1. Сделайте действие
+<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=大 口径=金钱 -->
 - Стоимость: 0 ₽
 - Простыми словами: Вывод.
 - Польза: Эффект.
 - Доказательность: B
 - Источник: https://gosuslugi.ru/
 """
-        errors = validate_russian_card(card, require_freshness=True)
+        self.assertTrue(card_requires_freshness(card))
+        errors = validate_russian_card(card, require_freshness=card_requires_freshness(card))
         self.assertTrue(any("Актуальность РФ проверена" in error for error in errors))
+
+    def test_international_source_does_not_require_russian_freshness(self):
+        card = """### 1. Сделайте действие
+<!-- 成本标签: 钱=0 时间=少 毅力=否 收益=大 口径=死亡率 -->
+- Стоимость: 0 ₽
+- Простыми словами: Вывод.
+- Польза: Эффект.
+- Доказательность: A
+- Источник: https://www.who.int/example
+"""
+        self.assertFalse(card_requires_freshness(card))
+        self.assertEqual(
+            validate_russian_card(card, require_freshness=card_requires_freshness(card)), []
+        )
 
     def test_accepts_upstream_hidden_cost_tag_values(self):
         tag = "<!-- 成本标签: 钱=0 时间=中 毅力=些 收益=大 口径=金钱 -->"
