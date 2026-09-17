@@ -7,6 +7,7 @@ from tools.check_russia_adaptation import (
     find_forbidden_china_refs,
     list_section_files,
     parse_migration_manifest,
+    validate_cost_tag,
     validate_russian_card,
 )
 
@@ -49,6 +50,15 @@ class RussiaAdaptationChecksTest(unittest.TestCase):
 """
         errors = validate_russian_card(card, require_freshness=True)
         self.assertTrue(any("Актуальность РФ проверена" in error for error in errors))
+
+    def test_accepts_upstream_hidden_cost_tag_values(self):
+        tag = "<!-- 成本标签: 钱=0 时间=中 毅力=些 收益=大 口径=金钱 -->"
+        self.assertEqual(validate_cost_tag(tag), [])
+
+    def test_rejects_translated_hidden_cost_tag_values(self):
+        tag = "<!-- 成本标签: 钱=0 时间=средний 毅力=нет 收益=большая 口径=деньги -->"
+        errors = validate_cost_tag(tag)
+        self.assertTrue(errors)
 
     def test_reports_forbidden_chinese_government_domains(self):
         text = "Источник: https://www.gov.cn/example и https://cbr.ru/example"
