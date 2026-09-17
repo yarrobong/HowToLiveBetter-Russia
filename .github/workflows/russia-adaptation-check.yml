@@ -3,11 +3,15 @@ name: Russia adaptation check
 on:
   push:
     branches:
-      - russia-adaptation-wave-1
+      - main
+      - 'russia-adaptation-wave-*'
   pull_request:
     paths:
+      - 'README.md'
       - 'book/**'
       - 'docs/RUSSIA-MIGRATION.md'
+      - 'docs/RUSSIA-SOURCES.md'
+      - 'index.html'
       - 'tools/check_russia_adaptation.py'
       - 'tools/test_check_russia_adaptation.py'
       - '.github/workflows/russia-adaptation-check.yml'

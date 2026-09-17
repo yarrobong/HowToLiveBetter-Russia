@@ -8,6 +8,7 @@ from tools.check_russia_adaptation import (
     find_forbidden_china_refs,
     list_section_files,
     parse_migration_manifest,
+    parse_readme_section_links,
     validate_cost_tag,
     validate_russian_card,
 )
@@ -96,6 +97,15 @@ class RussiaAdaptationChecksTest(unittest.TestCase):
             statuses = parse_migration_manifest(root)
             self.assertEqual(statuses[1], "in-progress")
             self.assertEqual(statuses[5], "complete")
+
+    def test_readme_has_31_existing_section_links(self):
+        links = parse_readme_section_links(PROJECT_ROOT)
+        self.assertEqual(len(links), 31)
+        for number, relative_path in links.items():
+            self.assertTrue(
+                (PROJECT_ROOT / relative_path).exists(),
+                f"README section {number:02d} points to missing {relative_path}",
+            )
 
     def test_static_ui_is_russian_and_migration_aware(self):
         html = (PROJECT_ROOT / "index.html").read_text(encoding="utf-8")
