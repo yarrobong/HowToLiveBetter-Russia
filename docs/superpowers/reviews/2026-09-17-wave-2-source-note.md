@@ -1,0 +1,3 @@
+# Wave 2 source note
+
+Russian legal and administrative claims in sections 10–12 were rechecked on 17.09.2026 against current primary/official sources, including the Family Code, Civil Code, Criminal Code, Federal Law No. 152-FZ, Federal Law No. 14-FZ and current Federal Tax Service guidance. Universal health/productivity claims in sections 02–06 retain international primary research and guideline sources where jurisdiction does not materially affect the result.
