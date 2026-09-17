@@ -1,0 +1,42 @@
+name: Применить полную русификацию
+
+on:
+  push:
+    branches:
+      - full-russian-localization
+    paths:
+      - 'tools/full_russian_localization.py'
+      - '.github/workflows/применить-полную-русификацию.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Получить репозиторий
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Настроить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Применить русификацию
+        run: python tools/full_russian_localization.py
+
+      - name: Зафиксировать изменения
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Изменений нет"
+            exit 0
+          fi
+          git commit -m "feat: полностью русифицировать актуальное дерево"
+          git push origin HEAD:full-russian-localization
