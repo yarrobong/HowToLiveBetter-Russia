@@ -25,20 +25,48 @@ FORBIDDEN_CHINA_GOVERNMENT_DOMAINS = (
     "mem.gov.cn",
 )
 
+TEXT_EXTENSIONS = {".md", ".html", ".py", ".yml", ".yaml", ".xml", ".txt", ".json", ".css", ".js"}
 SECTION_RE = re.compile(r"^(\d{2})-.*\.md$")
 MANIFEST_RE = re.compile(r"^\|\s*(\d{2})\s*\|\s*(not-started|in-progress|complete)\s*\|", re.MULTILINE)
 README_SECTION_RE = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*\[[^\]]+\]\((book/[^)]+\.md)\)\s*\|", re.MULTILINE)
 CARD_RE = re.compile(r"(?ms)^###\s+.+?(?=^###\s+|\Z)")
 URL_RE = re.compile(r"https?://[^\s)>\]}]+")
+CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 COST_TAG_RE = re.compile(
-    r"<!--\s*成本标签:\s*"
-    r"钱=(?:0|少|多)\s+"
-    r"时间=(?:少|中|多)\s+"
-    r"毅力=(?:否|些|是)\s+"
-    r"收益=(?:大|中|小)\s+"
-    r"口径=(?:死亡率|金钱|时间|自由)\s*-->"
+    r"<!--\s*метаданные:\s*"
+    r"деньги=(?:0|мало|много)\s+"
+    r"время=(?:мало|средне|много)\s+"
+    r"усилие=(?:нет|немного|да)\s+"
+    r"польза=(?:высокая|средняя|низкая)\s+"
+    r"метрика=(?:здоровье|деньги|время|свобода)\s*-->"
 )
 FRESHNESS_MARKER = "Актуальность РФ проверена:"
+
+
+def contains_cjk(text: str) -> bool:
+    return bool(CJK_RE.search(text))
+
+
+def find_cjk_paths(root: Path) -> list[Path]:
+    found: list[Path] = []
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root)
+        if ".git" in relative.parts or relative.as_posix() == "LICENSE":
+            continue
+        if contains_cjk(relative.as_posix()):
+            found.append(path)
+            continue
+        if path.suffix.lower() not in TEXT_EXTENSIONS:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if contains_cjk(text):
+            found.append(path)
+    return sorted(found, key=lambda item: item.relative_to(root).as_posix())
 
 
 def list_section_files(root: Path) -> list[Path]:
@@ -50,7 +78,7 @@ def list_section_files(root: Path) -> list[Path]:
 
 
 def parse_migration_manifest(root: Path) -> dict[int, str]:
-    path = root / "docs" / "RUSSIA-MIGRATION.md"
+    path = root / "docs" / "СТАТУС-АДАПТАЦИИ.md"
     if not path.exists():
         return {}
     text = path.read_text(encoding="utf-8")
@@ -69,9 +97,9 @@ def validate_cost_tag(text: str) -> list[str]:
     if COST_TAG_RE.search(text):
         return []
     return [
-        "нет корректного скрытого cost-тега; используйте исходные значения "
-        "钱=0|少|多 时间=少|中|多 毅力=否|些|是 收益=大|中|小 "
-        "口径=死亡率|金钱|时间|自由"
+        "нет корректного скрытого тега метаданных; используйте значения "
+        "деньги=0|мало|много время=мало|средне|много усилие=нет|немного|да "
+        "польза=высокая|средняя|низкая метрика=здоровье|деньги|время|свобода"
     ]
 
 
@@ -137,10 +165,12 @@ def check_repository(root: Path) -> list[str]:
         match = SECTION_RE.match(target.name)
         if not match or int(match.group(1)) != number:
             errors.append(f"README: номер {number:02d} не совпадает с файлом {relative_path}")
+        if contains_cjk(relative_path):
+            errors.append(f"README: путь раздела {number:02d} содержит CJK")
 
     statuses = parse_migration_manifest(root)
     if len(statuses) != 31:
-        errors.append(f"в RUSSIA-MIGRATION.md должно быть 31 статусов, найдено {len(statuses)}")
+        errors.append(f"в СТАТУС-АДАПТАЦИИ.md должно быть 31 статусов, найдено {len(statuses)}")
 
     for number, status in sorted(statuses.items()):
         if status != "complete":
@@ -162,6 +192,10 @@ def check_repository(root: Path) -> list[str]:
                 require_freshness=card_requires_freshness(card),
             ):
                 errors.append(f"{path}: карточка {index}: {error}")
+
+    cjk_paths = find_cjk_paths(root)
+    for path in cjk_paths:
+        errors.append(f"обнаружен CJK в активном файле: {path.relative_to(root).as_posix()}")
 
     return errors
 
