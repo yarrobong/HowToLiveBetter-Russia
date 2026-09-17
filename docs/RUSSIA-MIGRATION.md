@@ -9,15 +9,15 @@
 
 | Раздел | Статус |
 | --- | --- |
-| 01 | in-progress |
+| 01 | complete |
 | 02 | not-started |
 | 03 | not-started |
 | 04 | not-started |
-| 05 | in-progress |
+| 05 | complete |
 | 06 | not-started |
-| 07 | in-progress |
-| 08 | in-progress |
-| 09 | in-progress |
+| 07 | complete |
+| 08 | complete |
+| 09 | complete |
 | 10 | not-started |
 | 11 | not-started |
 | 12 | not-started |
@@ -27,12 +27,12 @@
 | 16 | not-started |
 | 17 | not-started |
 | 18 | not-started |
-| 19 | in-progress |
+| 19 | complete |
 | 20 | not-started |
 | 21 | not-started |
 | 22 | not-started |
 | 23 | not-started |
-| 24 | in-progress |
+| 24 | complete |
 | 25 | not-started |
 | 26 | not-started |
 | 27 | not-started |
@@ -43,6 +43,9 @@
 
 ## Первая волна
 
-Целевые разделы: 01, 05, 07, 08, 09, 19, 24.
+Завершённые разделы: 01, 05, 07, 08, 09, 19, 24.
 
 Дата начала: 17.09.2026.
+Дата проверки первой волны: 17.09.2026.
+
+Остальные 24 раздела пока сохраняют исходное содержание и не должны использоваться как российская правовая, финансовая, социальная или административная инструкция.
