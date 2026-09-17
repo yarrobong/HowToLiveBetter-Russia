@@ -27,6 +27,7 @@ FORBIDDEN_CHINA_GOVERNMENT_DOMAINS = (
 
 SECTION_RE = re.compile(r"^(\d{2})-.*\.md$")
 MANIFEST_RE = re.compile(r"^\|\s*(\d{2})\s*\|\s*(not-started|in-progress|complete)\s*\|", re.MULTILINE)
+README_SECTION_RE = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*\[[^\]]+\]\((book/[^)]+\.md)\)\s*\|", re.MULTILINE)
 CARD_RE = re.compile(r"(?ms)^###\s+.+?(?=^###\s+|\Z)")
 URL_RE = re.compile(r"https?://[^\s)>\]}]+")
 COST_TAG_RE = re.compile(
@@ -54,6 +55,14 @@ def parse_migration_manifest(root: Path) -> dict[int, str]:
         return {}
     text = path.read_text(encoding="utf-8")
     return {int(number): status for number, status in MANIFEST_RE.findall(text)}
+
+
+def parse_readme_section_links(root: Path) -> dict[int, str]:
+    path = root / "README.md"
+    if not path.exists():
+        return {}
+    text = path.read_text(encoding="utf-8")
+    return {int(number): relative_path for number, relative_path in README_SECTION_RE.findall(text)}
 
 
 def validate_cost_tag(text: str) -> list[str]:
@@ -117,9 +126,17 @@ def check_repository(root: Path) -> list[str]:
     if len(by_number) != len(sections):
         errors.append("обнаружены дублирующиеся номера разделов book/NN-*.md")
 
-    for number in (1, 5, 7, 8, 9, 19, 24):
-        if number not in by_number:
-            errors.append(f"отсутствует целевой раздел {number:02d}")
+    readme_links = parse_readme_section_links(root)
+    if len(readme_links) != 31:
+        errors.append(f"в README должно быть 31 ссылок на разделы, найдено {len(readme_links)}")
+    for number, relative_path in sorted(readme_links.items()):
+        target = root / relative_path
+        if not target.exists():
+            errors.append(f"README: раздел {number:02d} ссылается на отсутствующий файл {relative_path}")
+            continue
+        match = SECTION_RE.match(target.name)
+        if not match or int(match.group(1)) != number:
+            errors.append(f"README: номер {number:02d} не совпадает с файлом {relative_path}")
 
     statuses = parse_migration_manifest(root)
     if len(statuses) != 31:
@@ -130,6 +147,7 @@ def check_repository(root: Path) -> list[str]:
             continue
         path = by_number.get(number)
         if path is None:
+            errors.append(f"complete-раздел {number:02d} отсутствует в book/")
             continue
         text = path.read_text(encoding="utf-8")
         forbidden = find_forbidden_china_refs(text)
