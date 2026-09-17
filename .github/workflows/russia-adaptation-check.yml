@@ -1,0 +1,31 @@
+name: Russia adaptation check
+
+on:
+  push:
+    branches:
+      - russia-adaptation-wave-1
+  pull_request:
+    paths:
+      - 'book/**'
+      - 'docs/RUSSIA-MIGRATION.md'
+      - 'tools/check_russia_adaptation.py'
+      - 'tools/test_check_russia_adaptation.py'
+      - '.github/workflows/russia-adaptation-check.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run unit tests
+        run: python -m unittest tools.test_check_russia_adaptation -v
+
+      - name: Run repository checker
+        run: python tools/check_russia_adaptation.py
